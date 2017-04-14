@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <script src="//localhost:9092"></script>
+  <link rel="stylesheet" href="./vendor/leaflet.css" />
+  <style media="screen">
+    html, body, #map {
+      height: 100%;
+      width: 100%;
+      padding: 0;
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <script src="./vendor/leaflet-src.js"></script>
+  <script type="text/javascript">
+    L.VectorGrid = L.GridLayer.extend({
+      options: {
+    		// 🍂option subdomains: String = 'abc'
+    		// Akin to the `subdomains` option for `L.TileLayer`.
+    		subdomains: 'abc',	// Like L.TileLayer
+    	},
+      initialize: function(url, options) {
+        this._url = url;
+    		L.setOptions(this, options);
+      },
+      _getSubdomain: L.TileLayer.prototype._getSubdomain,
+      createTile: function(coords, done) {
+        console.log(coords);
+        // L.Util.requestAnimFrame(done.bind(coords, null, null));
+        var data = {
+    			s: this._getSubdomain(coords),
+    			x: coords.x,
+    			y: coords.y,
+    			z: coords.z
+    // 			z: this._getZoomForUrl()	/// TODO: Maybe replicate TileLayer's maxNativeZoom
+    		};
+        if (this._map && !this._map.options.crs.infinite) {
+    			var invertedY = this._globalTileRange.max.y - coords.y;
+    			if (this.options.tms) { // Should this option be available in Leaflet.VectorGrid?
+    				data['y'] = invertedY;
+    			}
+    			data['-y'] = invertedY;
+    		}
+        var tileUrl = L.Util.template(this._url, L.extend(data, this.options));
+        fetch(tileUrl).then(function(response){
+          console.log(response)
+        })
+        done();
+        return L.DomUtil.create('div', '');
+      }
+    });
+    var map = L.map('map', {    });
+    map.createPane('labels');
+    map.getPane('labels').style.zIndex = 650;
+    map.getPane('labels').style.pointerEvents = 'none';
+    var basemap = L.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', { attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://carto.com/attributions">CARTO</a>' });
+    var labels = L.tileLayer('http://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}.png', {
+      attribution: '©OpenStreetMap, ©CartoDB',
+      pane: 'labels'
+    });
+    map.setView([46.1651,-1.3481], 14);
+    map.addLayer(basemap);
+    map.addLayer(labels);
+
+    var url = 'https://{s}.tiles.mapbox.com/v4/mapbox.mapbox-streets-v6/{z}/{x}/{y}.vector.pbf?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpandmbXliNDBjZWd2M2x6bDk3c2ZtOTkifQ._QA7i5Mpkd_m30IGElHziw';
+    var vectorTileOptions = {
+  attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://www.mapbox.com/about/maps/">MapBox</a>',
+    }
+    new L.VectorGrid(url, vectorTileOptions).addTo(map);
+  </script>
+</body>
+</html>

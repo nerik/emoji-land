@@ -1,0 +1,28 @@
+{
+  "name": "emoji-land",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "server": "tileserver-gl-light madrid_spain.mbtiles",
+    "livereload": "live-reload --port 9092 .",
+    "open": "opener http://localhost:9095",
+    "serve": "http-server -s -p 9095 .",
+    "dev": "npm run build -s && (sleep 1 && npm run open -s) & npm run livereload -s & npm run serve",
+    "start": "npm run dev"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "tileserver-gl-light": "^1.5.0",
+    "emoji-alpha-codes": "git+ssh://git@github.com/nerik/emoji-alpha-codes",
+    "eslint": "^2.0.0",
+    "grunt": "^1.0.1",
+    "http-server": "^0.8.5",
+    "live-reload": "^1.1.0",
+    "opener": "^1.4.1"
+  },
+  "dependencies": {
+    "leaflet": "^1.0.3"
+  }
+}
